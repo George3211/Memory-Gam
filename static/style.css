@@ -1,83 +1,93 @@
-button1 {
-    position: absolute;
-    display: inline-block;
-    padding: 15px 25px;
-    font-size: 24px;
+/* Стил за основния контейнер на дъската */
+#board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 колони */
+    grid-template-rows: repeat(6, 1fr); /* 6 реда */
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Стилизиране на картите */
+.card {
+    width: 100px;
+    height: 100px;
+    background-color: #ccc;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    outline: none;
-    color: #fff;
+    transition: transform 0.2s;
+}
+
+.card.flipped {
+    background-color: #fff;
+}
+
+#startGameBtn {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
     background-color: #04AA6D;
     border: none;
-    border-radius: 15px;
-    box-shadow: 0 9px #999;
-    top: 88%;
-    left: 93%;
+    color: white;
+    font-size: 18px;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
-button1:hover {
+#startGameBtn:hover {
     background-color: #3e8e41;
 }
 
-button1:active {
+#startGameBtn:active {
     background-color: #3e8e41;
-    box-shadow: 0 5px #666;
     transform: translateY(4px);
 }
 
-button2 {
+#exitBtn {
     position: absolute;
-    display: inline-block;
-    padding: 15px 25px;
-    font-size: 24px;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    outline: none;
-    color: #fff;
-    background-color: #04AA6D;
+    bottom: 10%;
+    right: 5%;
+    padding: 10px 20px;
+    background-color: #d9534f;
     border: none;
-    border-radius: 15px;
-    box-shadow: 0 9px #999;
-    top: 88%;
-    right: 88%;
+    color: white;
+    font-size: 18px;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
-button2:hover {
-    background-color: #3e8e41;
+#exitBtn:hover {
+    background-color: #c9302c;
 }
 
-button2:active {
-    background-color: #3e8e41;
-    box-shadow: 0 5px #666;
+#exitBtn:active {
+    background-color: #c9302c;
     transform: translateY(4px);
 }
 
-button3 {
+#newGameBtn {
     position: absolute;
-    display: inline-block;
-    padding: 15px 25px;
-    font-size: 24px;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    outline: none;
-    color: #fff;
-    background-color: #04AA6D;
+    bottom: 10%;
+    left: 5%;
+    padding: 10px 20px;
+    background-color: #5bc0de;
     border: none;
-    border-radius: 15px;
-    box-shadow: 0 9px #999;
-    top: 88%;
-    right: 76%;
+    color: white;
+    font-size: 18px;
+    border-radius: 10px;
+    cursor: pointer;
 }
 
-button3:hover {
-    background-color: #3e8e41;
+#newGameBtn:hover {
+    background-color: #31b0d5;
 }
 
-button3:active {
-    background-color: #3e8e41;
-    box-shadow: 0 5px #666;
+#newGameBtn:active {
+    background-color: #31b0d5;
     transform: translateY(4px);
+}
+
+.hidden {
+    display: none;
 }

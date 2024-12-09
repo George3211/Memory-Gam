@@ -1,43 +1,305 @@
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-
     <title>Memory Game</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-    <style>h1 {text-align: center}</style>
-    <style>h2 {text-align: center}</style>
+    <style>
+        h1 {
+            text-align: center
+        }
 
-    <style>h4 {text-align: center}</style>
+        h2 {
+            text-align: center
+        }
+
+        h3 {
+            text-align: center
+        }
+
+        .card {
+            width: 140px;
+            height: 140px;
+            margin: 10px;
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .card .back {
+            background-color: gray;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .card.flipped img {
+            display: block;
+        }
+
+        .card.flipped .back {
+            display: none;
+        }
+
+        /* Hide game content initially */
+        #game-board,
+        #newGameBtn,
+        #exitBtn,
+        #timer {
+            display: none;
+        }
+
+        /* Show game content when game starts */
+        .game-active #game-board,
+        .game-active #newGameBtn,
+        .game-active #exitBtn,
+        .game-active #timer {
+            display: block;
+        }
+
+        /* Hide initial game description */
+        .game-description {
+            display: block;
+        }
+
+        .game-active .game-description {
+            display: none;
+        }
+
+        /* Position buttons */
+        #startBtn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #04AA6D;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #startBtn:hover {
+            background-color: #3e8e41;
+        }
+
+        #startBtn:active {
+            background-color: #3e8e41;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: translateY(2px);
+        }
+
+        #exitBtn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #exitBtn:hover {
+            background-color: #c9302c;
+        }
+
+        #exitBtn:active {
+            background-color: #c9302c;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: translateY(2px);
+        }
+
+        /* Timer styling */
+        #timer {
+            font-size: 20px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+    </style>
 </head>
 
 <body style="background-color: #bdf1f4">
 
-    <h1>Игра на памет</h1>
-    <h2>Правила!</h2>
+    <div class="game-description">
+        <h1>Игра на памет</h1>
+        <h2>Правила!</h2>
+        <br>
+        <br>
+        <h3>1.Когато натиснете бутона "Start Game", ще се отвори дъска със 24 квадрата.</h3>
+        <h3>2.Дъската съдържа 12 химични знака.</h4>
+        <h3>3.Намерете съотвествията на всеки химичен знак.</h4>
+        <h3>4.За да останат обърнати картите, трябва да ги отворите последователно.</h3>
+        <h3>5.Играта приключва, когато отворите всички верни комбинации.</h3>
+        <h3>6.При натискане на бутона "Exit" ще излезете от играта.</h3>
+    </div>
 
-    <br>
+    <div id="game-board" style="text-align: center;"></div>
 
-    <br>
+    <!-- New Game button (hidden until game starts) -->
+    <button id="newGameBtn" style="display: none;">New Game</button>
 
-    <h4>1.Когато натиснете бутона "Start Game", ще се отвори дъска със 24 квадрата.</h4>
-    <h4>2.Дъската съдържа 8 химични знака и 8 наименования.</h4>
-    <h4>3.Намерете съотвествията на всеки химичен знак с неговото наименование.</h4>
-    <h4>4.За да останат обърнати, трябва да ги отворите последователно.</h4>
-    <h4>5.Играта приключва, когато отворите всички верни комбинации.</h4>
-    <h4>6.При натискане на бутона "Exit" ще излезете от играта.</h4>
+    <!-- Start button in the bottom left corner -->
+    <button id="startBtn">Start Game</button>
 
-    <button1>Exit</button1>
-    <button2>Start Game</button2>
-    <button3>New Game</button3>
+    <!-- Exit button in the bottom right corner -->
+    <button id="exitBtn">Exit</button>
 
-    <py-script>
-      
-    </py-script>
+    <!-- Timer -->
+    <div id="timer">Time: 0</div>
+
+    <script>
+        let cards = [];
+        let flippedCards = [];
+        let matchedCards = 0;
+        let isChecking = false;
+        let timer;
+        let seconds = 0;
+
+        // Function to start a new game
+        function startGame() {
+            // Reset the time and matched cards
+            seconds = 0;
+            matchedCards = 0;
+            document.getElementById('timer').innerText = `Time: 0`;
+
+            // Hide game description and show game board
+            document.body.classList.add('game-active');
+
+            fetch('/start_game')
+                .then(response => response.json())
+                .then(data => {
+                    cards = data.cards;
+                    renderCards();
+                    startTimer();  // Start the timer when the game begins
+                });
+        }
+
+        // Function to render cards on the board
+        function renderCards() {
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.innerHTML = '';  // Clear previous game state
+
+            cards.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.dataset.index = index;
+
+                const front = document.createElement('img');
+                front.src = `/static/images_resized/${card.value}`;
+                front.classList.add('front');
+
+                const back = document.createElement('div');
+                back.classList.add('back');
+
+                cardElement.appendChild(front);
+                cardElement.appendChild(back);
+
+                cardElement.addEventListener('click', () => flipCard(index));
+
+                gameBoard.appendChild(cardElement);
+            });
+        }
+
+        // Function to flip a card
+        function flipCard(index) {
+            if (isChecking || cards[index].flipped || cards[index].matched) return; // Prevent actions if checking or card is already flipped/matched
+            cards[index].flipped = true;
+            flippedCards.push(index);
+            updateCardsState();
+
+            if (flippedCards.length === 2) {
+                isChecking = true;  // Block further clicks while checking
+                checkForMatch();
+            }
+        }
+
+        // Function to update the state of the cards
+        function updateCardsState() {
+            cards.forEach((card, index) => {
+                const cardElement = document.querySelector(`.card[data-index="${index}"]`);
+                if (card.flipped) {
+                    cardElement.classList.add('flipped');
+                } else {
+                    cardElement.classList.remove('flipped');
+                }
+            });
+        }
+
+        // Function to check if the flipped cards match
+        function checkForMatch() {
+            const [firstIndex, secondIndex] = flippedCards;
+            const firstCard = cards[firstIndex];
+            const secondCard = cards[secondIndex];
+
+            if (firstCard.value === secondCard.value) {
+                cards[firstIndex].matched = true;
+                cards[secondIndex].matched = true;
+                matchedCards++;
+
+                if (matchedCards === cards.length / 2) {
+                    clearInterval(timer);  // Stop the timer when game is finished
+                    setTimeout(() => alert(`Ти победи за ${seconds} секунди!`), 500);  // Display win message with time
+                }
+                resetFlippedCards();  // Reset the flipped cards array
+            } else {
+                setTimeout(() => {
+                    cards[firstIndex].flipped = false;
+                    cards[secondIndex].flipped = false;
+                    updateCardsState();
+                    resetFlippedCards();  // Reset the flipped cards array
+                }, 1000);  // Delay hiding non-matching cards
+            }
+        }
+
+        // Reset the flipped cards array and enable clicking again
+        function resetFlippedCards() {
+            flippedCards = [];
+            isChecking = false;
+        }
+
+        // Start the timer
+        function startTimer() {
+            timer = setInterval(() => {
+                seconds++;
+                document.getElementById('timer').innerText = `Time: ${seconds}`;
+            }, 1000);
+        }
+
+        // Start button click event
+        document.getElementById('startBtn').addEventListener('click', startGame);
+
+        // Exit button click event
+        document.getElementById('exitBtn').addEventListener('click', () => {
+            // Option 1: Close the window (if opened via JavaScript)
+            // window.close();  // This may not work in all browsers if not opened with JavaScript
+
+            // Option 2: Redirect to a different page (e.g., home page)
+            window.location.href = '/';  // Redirect to the home page
+        });
+
+        // New game button click event
+        document.getElementById('newGameBtn').addEventListener('click', startGame);
+    </script>
 </body>
+
 </html>
